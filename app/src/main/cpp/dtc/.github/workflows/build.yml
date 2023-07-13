@@ -1,0 +1,37 @@
+---
+name: Build test
+'on':
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+          os: [ "alpine", "archlinux", "fedora", "ubuntu" ]
+
+    container:
+      image: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: |
+          ./scripts/install-deps.sh
+
+      - name: Build
+        run: |
+          SETUPTOOLS_SCM_PRETEND_VERSION="0" make
+
+      - name: Run check
+        run: |
+          SETUPTOOLS_SCM_PRETEND_VERSION="0" make check
