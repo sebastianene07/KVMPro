@@ -28,10 +28,10 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
         # List C/C++ source files with relative paths to this CMakeLists.txt.
         native-lib.cpp)
 # For cmake debug gadget
-get_cmake_property(_variableNames VARIABLES)
-foreach (_variableName ${_variableNames})
-    message( "${_variableName}=${${_variableName}}")
-endforeach()
+#get_cmake_property(_variableNames VARIABLES)
+#foreach (_variableName ${_variableNames})
+#    message( "${_variableName}=${${_variableName}}")
+#endforeach()
 
 string(REPLACE android- android ANDROID_TOOLCHAIN_PREFIX_SEB
         ${ANDROID_TOOLCHAIN_PREFIX}

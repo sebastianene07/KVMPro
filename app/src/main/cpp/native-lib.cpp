@@ -5,17 +5,26 @@ extern "C" int handle_command(struct cmd_struct *command, int argc, const char *
 extern "C" struct cmd_struct kvm_commands[];
 
 extern "C"
-JNIEXPORT jstring JNICALL
-Java_com_example_kvmpro_MainActivity_stringFromJNI(JNIEnv *env, jobject thiz) {
-    std::string hello = "Hello from C++";
+JNIEXPORT int JNICALL
+Java_com_example_kvmpro_MainActivity_startVMJni(JNIEnv *env, jobject thiz, jobject vm) {
     const char *args[80];
-    args[0] = "run";
-    args[1] = "-k";
-    args[2] = "Image";
+    int argc = 0;
 
-    // DEMO: ./lkvm-static run -k Image
+    jclass cls = env->GetObjectClass(vm);
 
-    handle_command(kvm_commands, 4, args);
+    args[argc++] = "run";
 
-    return env->NewStringUTF(hello.c_str());
+    // Extract the disk name:
+    args[argc++] = "-d";
+    jfieldID diskFid = env->GetFieldID(cls, "diskFileName", "Ljava/lang/String;");
+    jstring diskImageS = (jstring)env->GetObjectField(vm, diskFid);
+    args[argc++] = env->GetStringUTFChars(diskImageS, NULL);
+
+    // Extract the kernel image name:
+    args[argc++] = "-k";
+    jfieldID kernelImageFid = env->GetFieldID(cls, "kernelImageFilename", "Ljava/lang/String;");
+    jstring kernelImageS = (jstring)env->GetObjectField(vm, kernelImageFid);
+    args[argc++] = env->GetStringUTFChars(kernelImageS, NULL);
+
+    handle_command(kvm_commands, argc, args);
 }
