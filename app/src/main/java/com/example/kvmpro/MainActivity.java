@@ -2,6 +2,7 @@ package com.example.kvmpro;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -15,6 +16,15 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String STRING_NO_VM_CONFIGS = "No VM config. Tap to add one";
     private static final String STRING_ADD_NEW_VM = "Tap to add a new one";
+
+    public static final int INT_CONFIGURE_VM = 1;
+    public static final int INT_END_CONFIGURE_VM = 2;
+    public static final int INT_START_VM = 3;
+    public static final int INT_END_START_VM = 4;
+
+    private ArrayAdapter vmListAdapter;
+    private List<String> vmArrayList;
+
     private KVMSettingsConfiguration _appCfg;
 
     // Used to load the 'native-lib' library on application startup.
@@ -33,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
         List<VMConfiguration> vmsCfg = _appCfg.getVMAvailableConfigs();
 
         ListView vmListView = findViewById(R.id.listview);
-        final List<String> vmArrayList = new ArrayList<String>();
+        vmArrayList = new ArrayList<String>();
         if (vmsCfg.isEmpty()) {
             vmArrayList.add(STRING_NO_VM_CONFIGS);
         } else {
@@ -44,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
             vmArrayList.add(STRING_ADD_NEW_VM);
         }
 
-        ArrayAdapter vmListAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, vmArrayList);
+        vmListAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, vmArrayList);
         vmListView.setAdapter(vmListAdapter);
         vmListView.setOnItemLongClickListener((parent, view, position, id) -> {
             final String item = (String) parent.getItemAtPosition(position);
@@ -61,12 +71,10 @@ public class MainActivity extends AppCompatActivity {
             final String item = (String) parent.getItemAtPosition(position);
             if (item.equals(STRING_NO_VM_CONFIGS) || item.equals(STRING_ADD_NEW_VM)) {
                 // Spawn a view to configure a new VM
-                // This will have to notify the vmListAdapter for object addition & modification
-                _appCfg.writeVMConfig(new VMConfiguration("seb test VM", "Image", "disk.img"));
                 vmArrayList.remove(item);
-                vmArrayList.add("seb");
-                vmArrayList.add(STRING_ADD_NEW_VM);
                 vmListAdapter.notifyDataSetChanged();
+                startActivityForResult(new Intent(this, VmActivity.class), INT_CONFIGURE_VM);
+
             } else {
                 // Spawn the VM >>> On another thread to make sure that we don't lockup
                 // the poor UI thread.
@@ -75,6 +83,22 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == INT_CONFIGURE_VM && resultCode == RESULT_OK && data != null) {
+            String kernelImagePath = data.getStringExtra(String.valueOf(R.string.KEYNAME_IMAGE_NAME));
+            String diskImagePath = data.getStringExtra(String.valueOf(R.string.KEYNAME_DISK_NAME));
+            String cfgName = data.getStringExtra(String.valueOf(R.string.KEYNAME_CFG_NAME));
+
+            // This will have to notify the vmListAdapter for object addition & modification
+            _appCfg.writeVMConfig(new VMConfiguration(cfgName, kernelImagePath, diskImagePath));
+            vmArrayList.add(cfgName);
+            vmArrayList.add(STRING_ADD_NEW_VM);
+            vmListAdapter.notifyDataSetChanged();
+        }
     }
 
     public native int startVMJni(VMConfiguration vm);

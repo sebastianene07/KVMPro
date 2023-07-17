@@ -1,3 +1,14 @@
 <resources>
     <string name="app_name">KVMPro</string>
+    <string name="kernel_image_text">Kernel Image name</string>
+    <string name="disk_image_name">Disk Image name</string>
+    <string name="extraceArgumentsName">Extra arguments</string>
+    <string name="selectfilename">Select disk</string>
+    <string name="configName">Configuration Name</string>
+    <string name="DoneConfig">Done</string>
+    <string name="selectKernelImage">Select Kernel Img</string>
+    <string name="KEYNAME_IMAGE_NAME">image_name</string>
+    <string name="KEYNAME_DISK_NAME">disk_name</string>
+    <string name="KEYNAME_CFG_NAME">cfg_name</string>
+    <string name="TYPE_CFG_NAME">Type config name</string>
 </resources>
