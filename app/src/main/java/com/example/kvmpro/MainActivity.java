@@ -4,6 +4,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.system.ErrnoException;
+import android.system.Os;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -37,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        runLoggingThread();
 
         // Read the saved config and populate the number of saved vms
         _appCfg = KVMSettingsConfiguration.getInstance(this);
@@ -79,6 +82,16 @@ public class MainActivity extends AppCompatActivity {
                 // Spawn the VM >>> On another thread to make sure that we don't lockup
                 // the poor UI thread.
 
+                VMConfiguration cfg = vmsCfg.get(position);
+                String home_path = cfg.kernelImageFilename;
+
+                try {
+                    cfg.homePath = home_path.substring(0, home_path.lastIndexOf("/"));
+                    Os.setenv("HOME", home_path.substring(0, home_path.lastIndexOf("/")), true);
+                } catch (ErrnoException e) {
+                    throw new RuntimeException(e);
+                }
+
                 startVMJni(vmsCfg.get(position));
             }
         });
@@ -102,4 +115,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public native int startVMJni(VMConfiguration vm);
+
+    public native int runLoggingThread();
 }

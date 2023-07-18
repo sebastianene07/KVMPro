@@ -2,11 +2,16 @@ package com.example.kvmpro;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.FileUtils;
 import android.os.ParcelFileDescriptor;
+import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.Log;
@@ -16,7 +21,11 @@ import android.widget.TextView;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class VmActivity extends AppCompatActivity {
 
@@ -64,7 +73,7 @@ public class VmActivity extends AppCompatActivity {
         });
     }
 
-    private String getFileNameThatICanUseInNativeCode(Uri uri) throws FileNotFoundException {
+    private String getFileNameThatICanUseInNativeCode(Uri uri) throws FileNotFoundException, IOException {
         ParcelFileDescriptor mParcelFileDescriptor = getApplicationContext().getContentResolver().openFileDescriptor(uri, "r");
         if (mParcelFileDescriptor != null) {
             int fd = mParcelFileDescriptor.getFd();
@@ -73,18 +82,42 @@ public class VmActivity extends AppCompatActivity {
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     path = Os.readlink(file.getAbsolutePath()).toString();
+                    mParcelFileDescriptor.close();
                 }
             } catch (ErrnoException e) {
                 e.printStackTrace();
             }
 
+            Log.i("getFileNameThatICanUseInNativeCode", path);
             return path;
-        }
-        else{
+        } else {
             return null;
         }
     }
+    @SuppressLint("Range")
+    public String getRealPathFromURI(Uri uri) throws IOException {
+        String result;
+        Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+        if (cursor ==null)
 
+        {
+            result = uri.getPath();
+            cursor.close();
+            return result;
+        }
+        cursor.moveToFirst();
+        result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+        cursor.close();
+
+        File file =  File.createTempFile(result, "");
+        FileOutputStream fos = new FileOutputStream(file);
+        InputStream inputStream = getContentResolver().openInputStream(uri);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            FileUtils.copy(inputStream, fos);
+        }
+
+        return file.getAbsolutePath();
+    }
     @Override
     public void onActivityResult(int requestCode, int resultCode,
                                  Intent returnIntent) {
@@ -96,20 +129,23 @@ public class VmActivity extends AppCompatActivity {
             return;
         } else if (requestCode == PICKFILE_KERNEL_IMAGE_REQ_CODE){
             Uri returnUri = returnIntent.getData();
+
             try {
                 String filePath = getFileNameThatICanUseInNativeCode(returnUri);
+                filePath = getRealPathFromURI(returnUri);
                 TextView kImageTextView = findViewById(R.id.kernerlImageNameId);
                 kImageTextView.setText(filePath);
-            } catch (FileNotFoundException e) {
+            } catch (IOException e) {
                 Log.e("kernelImage", e.toString());
             }
         } else if (requestCode == PICKFILE_DISK_IMAGE_REQ_CODE){
             Uri returnUri = returnIntent.getData();
             try {
                 String filePath = getFileNameThatICanUseInNativeCode(returnUri);
+                filePath = getRealPathFromURI(returnUri);
                 TextView kImageTextView = findViewById(R.id.diskImageNameId);
                 kImageTextView.setText(filePath);
-            } catch (FileNotFoundException e) {
+            } catch (IOException e) {
 
             }
         }

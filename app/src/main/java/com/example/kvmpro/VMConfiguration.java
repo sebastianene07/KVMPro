@@ -7,6 +7,7 @@ public class VMConfiguration implements Serializable {
     public String kernelImageFilename;
     public String diskFileName;
     public String appendedBootargs;
+    public String homePath;
 
     public VMConfiguration()
     {
