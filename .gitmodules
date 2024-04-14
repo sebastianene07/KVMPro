@@ -1,0 +1,3 @@
+[submodule "kvmtool"]
+	path = app/src/main/cpp/kvmtool
+	url = git@github.com:sebastianene07/kvmtool.git
