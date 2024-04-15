@@ -68,8 +68,7 @@ public class MainActivity extends AppCompatActivity {
             vmArrayList.remove(item);
             vmListAdapter.notifyDataSetChanged();
             return true;
-        })
-        ;
+        });
         vmListView.setOnItemClickListener((parent, view, position, id) -> {
             final String item = (String) parent.getItemAtPosition(position);
             if (item.equals(STRING_NO_VM_CONFIGS) || item.equals(STRING_ADD_NEW_VM)) {
@@ -92,10 +91,10 @@ public class MainActivity extends AppCompatActivity {
                     throw new RuntimeException(e);
                 }
 
-                startVMJni(vmsCfg.get(position));
+                VMConfiguration vmCfg = vmsCfg.get(position);
+                startVMJni(vmCfg);
             }
         });
-
     }
 
     @Override
@@ -104,10 +103,11 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == INT_CONFIGURE_VM && resultCode == RESULT_OK && data != null) {
             String kernelImagePath = data.getStringExtra(String.valueOf(R.string.KEYNAME_IMAGE_NAME));
             String diskImagePath = data.getStringExtra(String.valueOf(R.string.KEYNAME_DISK_NAME));
+            String initrdImagePath = data.getStringExtra(String.valueOf(R.string.KEYNAME_INITRD_NAME));
             String cfgName = data.getStringExtra(String.valueOf(R.string.KEYNAME_CFG_NAME));
 
             // This will have to notify the vmListAdapter for object addition & modification
-            _appCfg.writeVMConfig(new VMConfiguration(cfgName, kernelImagePath, diskImagePath));
+            _appCfg.writeVMConfig(new VMConfiguration(cfgName, kernelImagePath, diskImagePath, initrdImagePath));
             vmArrayList.add(cfgName);
             vmArrayList.add(STRING_ADD_NEW_VM);
             vmListAdapter.notifyDataSetChanged();

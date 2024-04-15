@@ -33,10 +33,20 @@ Java_com_example_kvmpro_MainActivity_startVMJni(JNIEnv *env, jobject thiz, jobje
     args[argc++] = "run";
 
     // Extract the disk name:
-    args[argc++] = "-d";
     jfieldID diskFid = env->GetFieldID(cls, "diskFileName", "Ljava/lang/String;");
     jstring diskImageS = (jstring)env->GetObjectField(vm, diskFid);
-    args[argc++] = env->GetStringUTFChars(diskImageS, NULL);
+    if (diskImageS) {
+        args[argc++] = "-d";
+        args[argc++] = env->GetStringUTFChars(diskImageS, NULL);
+    }
+
+    // Extract the initrd name:
+    jfieldID initRdFid = env->GetFieldID(cls, "initrdFileName", "Ljava/lang/String;");
+    jstring initrdImageS = (jstring)env->GetObjectField(vm, initRdFid);
+    if (initrdImageS) {
+        args[argc++] = "-i";
+        args[argc++] = env->GetStringUTFChars(initrdImageS, NULL);
+    }
 
     // Add memory attribute
 //    args[argc++] = "-m";

@@ -32,6 +32,8 @@ public class VmActivity extends AppCompatActivity {
     private static final int PICKFILE_KERNEL_IMAGE_REQ_CODE = 8778;
     private static final int PICKFILE_DISK_IMAGE_REQ_CODE = 8779;
 
+    private static final int PICKFILE_INITRD_IMAGE_REQ_CODE = 8780;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,17 +59,34 @@ public class VmActivity extends AppCompatActivity {
             );
         });
 
+        Button initrdImageButton = findViewById(R.id.initrdImageButtonId);
+        initrdImageButton.setOnClickListener(view -> {
+            Intent chooseFile = new Intent(Intent.ACTION_GET_CONTENT);
+            chooseFile.setType("*/*");
+            startActivityForResult(
+                    Intent.createChooser(chooseFile, "Choose a file"),
+                    PICKFILE_INITRD_IMAGE_REQ_CODE
+            );
+        });
+
         Button doneButton = findViewById(R.id.doneButtonId);
         doneButton.setOnClickListener(view -> {
             // Put the String to pass back into an Intent and close this activity
             TextView kImgTextView = findViewById(R.id.kernerlImageNameId);
             TextView diskTextView = findViewById(R.id.diskImageNameId);
+            TextView initrdTextView = findViewById(R.id.initrdImageNameId);
             TextInputEditText textInputView = findViewById(R.id.cfgNameTextInputId);
 
             Intent intent = new Intent();
             intent.putExtra(String.valueOf(R.string.KEYNAME_IMAGE_NAME), kImgTextView.getText().toString());
-            intent.putExtra(String.valueOf(R.string.KEYNAME_DISK_NAME), diskTextView.getText().toString());
             intent.putExtra(String.valueOf(R.string.KEYNAME_CFG_NAME), textInputView.getText().toString());
+            if (!diskTextView.getText().toString().equals(getResources().getString(R.string.disk_image_name))) {
+                intent.putExtra(String.valueOf(R.string.KEYNAME_DISK_NAME), diskTextView.getText().toString());
+            }
+
+            if (!initrdTextView.getText().toString().equals(getResources().getString(R.string.initrd_image_name))) {
+                intent.putExtra(String.valueOf(R.string.KEYNAME_INITRD_NAME), initrdTextView.getText().toString());
+            }
             setResult(RESULT_OK, intent);
             finish();
         });
@@ -145,6 +164,16 @@ public class VmActivity extends AppCompatActivity {
                 filePath = getRealPathFromURI(returnUri);
                 TextView kImageTextView = findViewById(R.id.diskImageNameId);
                 kImageTextView.setText(filePath);
+            } catch (IOException e) {
+
+            }
+        } else if (requestCode == PICKFILE_INITRD_IMAGE_REQ_CODE){
+            Uri returnUri = returnIntent.getData();
+            try {
+                String filePath = getFileNameThatICanUseInNativeCode(returnUri);
+                filePath = getRealPathFromURI(returnUri);
+                TextView initrdTextView = findViewById(R.id.initrdImageNameId);
+                initrdTextView.setText(filePath);
             } catch (IOException e) {
 
             }

@@ -11,4 +11,7 @@
     <string name="KEYNAME_DISK_NAME">disk_name</string>
     <string name="KEYNAME_CFG_NAME">cfg_name</string>
     <string name="TYPE_CFG_NAME">Type config name</string>
+    <string name="initrd_image_name">Initrd img</string>
+    <string name="selectinitrdname">Select initrd</string>
+    <string name="KEYNAME_INITRD_NAME">initrd_name</string>
 </resources>
