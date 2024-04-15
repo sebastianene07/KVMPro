@@ -69,18 +69,24 @@ Java_com_example_kvmpro_MainActivity_startVMJni(JNIEnv *env, jobject thiz, jobje
 
 static void *loggingFunction(void*)
 {
-    ssize_t readSize;
+    ssize_t readSize = 0;
     char buf[128];
+    char c;
 
-    while((readSize = read(pfd[0], buf, sizeof buf - 1)) > 0) {
-        if(buf[readSize - 1] == '\n') {
-            --readSize;
+    while(read(pfd[0], &c, 1) > 0) {
+        // Do we still have space ?
+        if (readSize < sizeof(buf))
+            buf[readSize] = c;
+
+        if(c == '\n') {
+            buf[readSize] = 0;  // add null-terminator
+            __android_log_write(ANDROID_LOG_DEBUG, LOG_TAG, buf); // Set any log level you want
+            readSize = 0;
         }
 
-        buf[readSize] = 0;  // add null-terminator
-
-        __android_log_write(ANDROID_LOG_DEBUG, LOG_TAG, buf); // Set any log level you want
-    }
+        readSize++;
+        readSize = readSize % sizeof(buf);
+     }
 
     return 0;
 }
