@@ -25,7 +25,7 @@ static void *startVmThread(void *args)
 
 extern "C"
 JNIEXPORT int JNICALL
-Java_com_example_kvmpro_MainActivity_startVMJni(JNIEnv *env, jobject thiz, jobject vm) {
+Java_com_example_kvmpro_VmRun_startVMJni(JNIEnv *env, jobject thiz, jobject vm) {
     static const char *args[80];
     int argc = 0;
     jclass cls = env->GetObjectClass(vm);
@@ -77,25 +77,47 @@ Java_com_example_kvmpro_MainActivity_startVMJni(JNIEnv *env, jobject thiz, jobje
     return 0;
 }
 
-static void *loggingFunction(void*)
+struct vm_run_jobjects {
+    JNIEnv *env;
+    jobject thiz;
+    jmethodID methodId;
+};
+JavaVM *g_vm;
+
+jint JNI_OnLoad(JavaVM *vm, void *reserved)
+{
+    g_vm = vm;
+    return JNI_VERSION_1_6;
+}
+
+static void *loggingFunction(void *_arg)
 {
     ssize_t readSize = 0;
     char buf[128];
     char c;
+    jsize nVMs;
+    struct vm_run_jobjects *args = (struct vm_run_jobjects *)_arg;
+    JNIEnv *env = args->env;
+    jmethodID notifyConsoleUpdate = args->methodId;
+
+    g_vm->AttachCurrentThread(&env, NULL);
 
     while(read(pfd[0], &c, 1) > 0) {
-        // Do we still have space ?
-        if (readSize < sizeof(buf))
-            buf[readSize] = c;
 
-        if(c == '\n') {
-            buf[readSize] = 0;  // add null-terminator
-            __android_log_write(ANDROID_LOG_DEBUG, LOG_TAG, buf); // Set any log level you want
-            readSize = 0;
-        }
-
-        readSize++;
-        readSize = readSize % sizeof(buf);
+        env->CallVoidMethod(args->thiz, notifyConsoleUpdate, c);
+//        // Do we still have space ?
+//        if (readSize < sizeof(buf))
+//            buf[readSize] = c;
+//
+//        if(c == '\n') {
+//            buf[readSize] = 0;  // add null-terminator
+//            __android_log_write(ANDROID_LOG_DEBUG, LOG_TAG, buf); // Set any log level you want
+//
+//            readSize = 0;
+//        }
+//
+//        readSize++;
+//        readSize = readSize % sizeof(buf);
      }
 
     return 0;
@@ -103,8 +125,17 @@ static void *loggingFunction(void*)
 
 extern "C"
 JNIEXPORT jint JNICALL
-Java_com_example_kvmpro_MainActivity_runLoggingThread(JNIEnv *env, jobject thiz)
+Java_com_example_kvmpro_VmRun_runLoggingThread(JNIEnv *env, jobject thiz)
 {
+    static struct vm_run_jobjects vm_run_objs = {
+            .env = env,
+    };
+
+    jclass cls = env->FindClass("com/example/kvmpro/VmRun");
+    vm_run_objs.methodId = env->GetMethodID(cls,"notifyConsoleUpdate", "(C)V");
+
+    vm_run_objs.thiz = env->NewGlobalRef(thiz);
+
     setvbuf(stdout, 0, _IOLBF, 0); // make stdout line-buffered
     setvbuf(stderr, 0, _IONBF, 0); // make stderr unbuffered
 
@@ -114,7 +145,7 @@ Java_com_example_kvmpro_MainActivity_runLoggingThread(JNIEnv *env, jobject thiz)
     dup2(pfd[1], 2);
 
     /* spawn the logging thread */
-    if(pthread_create(&loggingThread, 0, loggingFunction, 0) == -1) {
+    if (pthread_create(&loggingThread, 0, loggingFunction, &vm_run_objs) == -1) {
         return -1;
     }
 

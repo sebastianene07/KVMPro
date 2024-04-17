@@ -39,7 +39,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        runLoggingThread();
 
         // Read the saved config and populate the number of saved vms
         _appCfg = KVMSettingsConfiguration.getInstance(this);
@@ -92,7 +91,9 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 VMConfiguration vmCfg = vmsCfg.get(position);
-                startVMJni(vmCfg);
+                Intent vmRunIntent = new Intent(this, VmRun.class);
+                vmRunIntent.putExtra("VM_CONFIGURATION", vmCfg);
+                startActivityForResult(vmRunIntent, 0);
             }
         });
     }
@@ -113,8 +114,4 @@ public class MainActivity extends AppCompatActivity {
             vmListAdapter.notifyDataSetChanged();
         }
     }
-
-    public native int startVMJni(VMConfiguration vm);
-
-    public native int runLoggingThread();
 }

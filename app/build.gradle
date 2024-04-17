@@ -34,6 +34,9 @@ android {
     }
 
     namespace 'com.example.kvmpro'
+    buildFeatures {
+        viewBinding true
+    }
 }
 
 dependencies {

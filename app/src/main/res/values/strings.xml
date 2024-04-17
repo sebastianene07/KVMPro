@@ -14,4 +14,7 @@
     <string name="initrd_image_name">Initrd img</string>
     <string name="selectinitrdname">Select initrd</string>
     <string name="KEYNAME_INITRD_NAME">initrd_name</string>
+    <string name="title_activity_vm_run">VmRun</string>
+    <string name="large_text"></string>
+    <string name="action_settings">Settings</string>
 </resources>
