@@ -6,14 +6,41 @@
     android:layout_height="match_parent"
     tools:context=".VmRun">
 
-    <ScrollView
-        android:id="@+id/scrollviewconsole"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        >
-    <TextView
-        android:id="@+id/vm_output_console"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-    </ScrollView>
+        android:orientation="vertical">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="0.1">
+        <ScrollView
+            android:id="@+id/scrollviewconsole"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <TextView
+                android:id="@+id/vm_output_console"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </ScrollView>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="0.6">
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/inputConsoleView"
+                android:inputType="text"
+                android:imeOptions="actionDone"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+        </com.google.android.material.textfield.TextInputLayout>
+        </RelativeLayout>
+    </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

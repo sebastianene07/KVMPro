@@ -3,6 +3,8 @@
 #include <android/log.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <sys/ioctl.h>
+#include <termios.h>
 
 extern "C" int handle_command(struct cmd_struct *command, int argc, const char **argv);
 extern "C" struct cmd_struct kvm_commands[];
@@ -13,7 +15,8 @@ struct vm_args_s {
     void *argv;
 };
 
-static int pfd[2];
+static int pfd_vm_output[2];
+static int pfd_vm_input[2];
 static pthread_t loggingThread, vmThread;
 static const char *LOG_TAG = "[native]";
 static struct vm_args_s vm_args;
@@ -49,12 +52,12 @@ Java_com_example_kvmpro_VmRun_startVMJni(JNIEnv *env, jobject thiz, jobject vm) 
     }
 
     // Add memory attribute
-//    args[argc++] = "-m";
-//    args[argc++] = "128";
+    args[argc++] = "-m";
+    args[argc++] = "1024";
 
-    // Add memory attribute
+    // Add cpu attribute
     args[argc++] = "-c";
-    args[argc++] = "1";
+    args[argc++] = "2";
 
     // Extract the kernel image name:
     args[argc++] = "-k";
@@ -90,35 +93,24 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved)
     return JNI_VERSION_1_6;
 }
 
-static void *loggingFunction(void *_arg)
-{
+static void *loggingFunction(void *_arg) {
     ssize_t readSize = 0;
     char buf[128];
     char c;
-    jsize nVMs;
-    struct vm_run_jobjects *args = (struct vm_run_jobjects *)_arg;
+    struct vm_run_jobjects *args = (struct vm_run_jobjects *) _arg;
     JNIEnv *env = args->env;
     jmethodID notifyConsoleUpdate = args->methodId;
+    jint status;
 
-    g_vm->AttachCurrentThread(&env, NULL);
+    status = g_vm->AttachCurrentThread(&env, NULL);
+    if (status == JNI_OK) {
+        while (read(pfd_vm_output[0], &c, 1) > 0) {
+            env->CallVoidMethod(args->thiz, notifyConsoleUpdate, c);
+            env->ExceptionClear();
+        }
+    }
 
-    while(read(pfd[0], &c, 1) > 0) {
-
-        env->CallVoidMethod(args->thiz, notifyConsoleUpdate, c);
-//        // Do we still have space ?
-//        if (readSize < sizeof(buf))
-//            buf[readSize] = c;
-//
-//        if(c == '\n') {
-//            buf[readSize] = 0;  // add null-terminator
-//            __android_log_write(ANDROID_LOG_DEBUG, LOG_TAG, buf); // Set any log level you want
-//
-//            readSize = 0;
-//        }
-//
-//        readSize++;
-//        readSize = readSize % sizeof(buf);
-     }
+    env->DeleteGlobalRef(args->thiz);
 
     return 0;
 }
@@ -133,16 +125,19 @@ Java_com_example_kvmpro_VmRun_runLoggingThread(JNIEnv *env, jobject thiz)
 
     jclass cls = env->FindClass("com/example/kvmpro/VmRun");
     vm_run_objs.methodId = env->GetMethodID(cls,"notifyConsoleUpdate", "(C)V");
-
     vm_run_objs.thiz = env->NewGlobalRef(thiz);
+
 
     setvbuf(stdout, 0, _IOLBF, 0); // make stdout line-buffered
     setvbuf(stderr, 0, _IONBF, 0); // make stderr unbuffered
 
     /* create the pipe and redirect stdout and stderr */
-    pipe(pfd);
-    dup2(pfd[1], 1);
-    dup2(pfd[1], 2);
+    pipe(pfd_vm_output);
+    dup2(pfd_vm_output[1], 1);
+    dup2(pfd_vm_output[1], 2);
+
+    pipe(pfd_vm_input);
+    dup2(pfd_vm_input[0], 0);
 
     /* spawn the logging thread */
     if (pthread_create(&loggingThread, 0, loggingFunction, &vm_run_objs) == -1) {
@@ -151,4 +146,12 @@ Java_com_example_kvmpro_VmRun_runLoggingThread(JNIEnv *env, jobject thiz)
 
     pthread_detach(loggingThread);
     return 0;
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_example_kvmpro_VmRun_sendConsoleCharacters(JNIEnv *env, jobject thiz, jstring characters) {
+    const char *consoleChar = env->GetStringUTFChars(characters, NULL);
+    write(pfd_vm_input[1], consoleChar, strlen(consoleChar));
+    env->ReleaseStringUTFChars(characters, consoleChar);
 }
