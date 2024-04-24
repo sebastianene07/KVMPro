@@ -161,3 +161,14 @@ Java_com_example_kvmpro_VmRun_sendConsoleCharacters(JNIEnv *env, jobject thiz, j
     write(pfd_vm_input[1], consoleChar, strlen(consoleChar));
     env->ReleaseStringUTFChars(characters, consoleChar);
 }
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_example_kvmpro_VmRun_stopVmJni(JNIEnv *env, jobject thiz) {
+    int argc = 0;
+    const char *args[80];
+
+    args[argc++] = "stop";
+    args[argc++] = "-a";
+
+    handle_command(kvm_commands, argc, (const char **)args);
+}

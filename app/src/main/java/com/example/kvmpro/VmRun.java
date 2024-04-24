@@ -2,7 +2,9 @@ package com.example.kvmpro;
 
 import android.os.Bundle;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -53,12 +55,31 @@ public class VmRun extends AppCompatActivity {
             }
         });
 
+        // This callback is only called when MyFragment is at least started
+        OnBackPressedCallback callback = new OnBackPressedCallback(true /* enabled by default */) {
+            @Override
+            public void handleOnBackPressed() {
+                System.out.println("I am back from VMRun");
+                stopVmJni();
+                this.setEnabled(false);
+                VmRun.super.onBackPressed();
+            }
+        };
+
+        this.getOnBackPressedDispatcher().addCallback(this, callback);
+
         VMConfiguration vmCfg = getIntent().getParcelableExtra("VM_CONFIGURATION", VMConfiguration.class);
         runLoggingThread();
         startVMJni(vmCfg);
     }
 
     private String unicodeColor;
+
+    @Override
+    public void onPointerCaptureChanged(boolean hasCapture) {
+        super.onPointerCaptureChanged(hasCapture);
+    }
+
     private enum unicode_color_parser {
         NOPE,
         START,
@@ -113,4 +134,6 @@ public class VmRun extends AppCompatActivity {
     public native int startVMJni(VMConfiguration vm);
 
     public native int runLoggingThread();
+
+    public native void stopVmJni();
 }
