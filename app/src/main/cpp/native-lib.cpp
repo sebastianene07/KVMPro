@@ -18,12 +18,18 @@ struct vm_args_s {
 static int pfd_vm_output[2];
 static int pfd_vm_input[2];
 static pthread_t loggingThread, vmThread;
-static const char *LOG_TAG = "[native]";
 static struct vm_args_s vm_args;
 
 static void *startVmThread(void *args)
 {
-    handle_command(kvm_commands, vm_args.argc, (const char **)vm_args.argv);
+    int ret;
+
+    ret = handle_command(kvm_commands, vm_args.argc, (const char **)vm_args.argv);
+    if (ret < 0) {
+        fprintf(stderr, "Error %d starting VM\n", ret);
+    }
+
+    return NULL;
 }
 
 extern "C"
