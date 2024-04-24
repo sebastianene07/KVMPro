@@ -75,7 +75,10 @@ public class MainActivity extends AppCompatActivity {
                 vmArrayList.remove(item);
                 vmListAdapter.notifyDataSetChanged();
                 startActivityForResult(new Intent(this, VmActivity.class), INT_CONFIGURE_VM);
-
+                if (vmArrayList.isEmpty() && item.equals(STRING_NO_VM_CONFIGS)) {
+                    vmArrayList.add(item);
+                    vmListAdapter.notifyDataSetChanged();
+                }
             } else {
                 // Spawn the VM >>> On another thread to make sure that we don't lockup
                 // the poor UI thread.
