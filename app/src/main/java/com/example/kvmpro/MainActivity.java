@@ -75,10 +75,6 @@ public class MainActivity extends AppCompatActivity {
                 vmArrayList.remove(item);
                 vmListAdapter.notifyDataSetChanged();
                 startActivityForResult(new Intent(this, VmActivity.class), INT_CONFIGURE_VM);
-                if (vmArrayList.isEmpty() && item.equals(STRING_NO_VM_CONFIGS)) {
-                    vmArrayList.add(item);
-                    vmListAdapter.notifyDataSetChanged();
-                }
             } else {
                 // Spawn the VM >>> On another thread to make sure that we don't lockup
                 // the poor UI thread.
@@ -104,17 +100,27 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == INT_CONFIGURE_VM && resultCode == RESULT_OK && data != null) {
-            String kernelImagePath = data.getStringExtra(String.valueOf(R.string.KEYNAME_IMAGE_NAME));
-            String diskImagePath = data.getStringExtra(String.valueOf(R.string.KEYNAME_DISK_NAME));
-            String initrdImagePath = data.getStringExtra(String.valueOf(R.string.KEYNAME_INITRD_NAME));
-            String cfgName = data.getStringExtra(String.valueOf(R.string.KEYNAME_CFG_NAME));
+        if (requestCode == INT_CONFIGURE_VM) {
+            if (resultCode == RESULT_OK && data != null) {
+                String kernelImagePath = data.getStringExtra(String.valueOf(R.string.KEYNAME_IMAGE_NAME));
+                String diskImagePath = data.getStringExtra(String.valueOf(R.string.KEYNAME_DISK_NAME));
+                String initrdImagePath = data.getStringExtra(String.valueOf(R.string.KEYNAME_INITRD_NAME));
+                String cfgName = data.getStringExtra(String.valueOf(R.string.KEYNAME_CFG_NAME));
 
-            // This will have to notify the vmListAdapter for object addition & modification
-            _appCfg.writeVMConfig(new VMConfiguration(cfgName, kernelImagePath, diskImagePath, initrdImagePath));
-            vmArrayList.add(cfgName);
-            vmArrayList.add(STRING_ADD_NEW_VM);
-            vmListAdapter.notifyDataSetChanged();
+                // This will have to notify the vmListAdapter for object addition & modification
+                _appCfg.writeVMConfig(new VMConfiguration(cfgName, kernelImagePath, diskImagePath, initrdImagePath));
+                vmArrayList.add(cfgName);
+                vmArrayList.add(STRING_ADD_NEW_VM);
+                vmListAdapter.notifyDataSetChanged();
+            }
+            else {
+                if (vmArrayList.isEmpty()) {
+                    vmArrayList.add(STRING_NO_VM_CONFIGS);
+                } else {
+                    vmArrayList.add(STRING_ADD_NEW_VM);
+                }
+                vmListAdapter.notifyDataSetChanged();
+            }
         }
     }
 }

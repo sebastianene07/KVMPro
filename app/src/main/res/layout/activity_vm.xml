@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -8,9 +9,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="30dp"
         android:layout_marginTop="10dp"
-        android:layout_marginRight="30dp"
         android:orientation="vertical">
 
         <LinearLayout
@@ -29,93 +28,130 @@
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/linearLayout5"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:weightSum="2"
-            android:orientation="horizontal">
+            android:weightSum="2">
 
             <TextView
                 android:id="@+id/kernerlImageNameId"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/kernel_image_text" />
+                android:layout_width="0dp"
+                android:layout_height="55dp"
+                android:layout_marginStart="30dp"
+                android:layout_marginLeft="30dp"
+                android:layout_marginTop="66dp"
+                android:text="@string/kernel_image_text"
+                app:layout_constraintEnd_toStartOf="@+id/kernelImageButtonId"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <Button
                 android:id="@+id/kernelImageButtonId"
-                android:layout_width="30dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/selectKernelImage" />
-        </LinearLayout>
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:text="@string/selectKernelImage"
+                app:layout_constraintBottom_toBottomOf="@+id/kernerlImageNameId"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/kernerlImageNameId"
+                app:layout_constraintTop_toTopOf="@+id/kernerlImageNameId" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/linearLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:weightSum="2"
-            android:orientation="horizontal">
+            android:weightSum="2">
 
             <TextView
                 android:id="@+id/diskImageNameId"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/disk_image_name" />
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginStart="30dp"
+                android:layout_marginLeft="30dp"
+                android:layout_marginEnd="1dp"
+                android:layout_marginRight="1dp"
+                android:text="@string/disk_image_name"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/diskImageButtonId"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/diskImageButtonId" />
 
             <Button
                 android:id="@+id/diskImageButtonId"
-                android:layout_width="30dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/selectfilename" />
-        </LinearLayout>
+                android:layout_width="0dp"
 
-        <LinearLayout
+                android:layout_height="wrap_content"
+                android:text="@string/selectfilename"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/diskImageNameId" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/linearLayout2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:weightSum="2"
-            android:orientation="horizontal">
+            android:weightSum="2">
 
             <TextView
                 android:id="@+id/initrdImageNameId"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/initrd_image_name" />
+                android:layout_marginStart="30dp"
+                android:layout_marginLeft="30dp"
+                android:layout_marginBottom="15dp"
+                android:text="@string/initrd_image_name"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/initrdImageButtonId"
+                app:layout_constraintStart_toStartOf="parent" />
 
             <Button
                 android:id="@+id/initrdImageButtonId"
-                android:layout_width="30dp"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/selectinitrdname" />
-        </LinearLayout>
-        <LinearLayout
+                android:text="@string/selectinitrdname"
+                app:layout_constraintBaseline_toBaselineOf="@+id/initrdImageNameId"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/initrdImageNameId" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/linearLayout3"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_marginTop="30dp"
+            android:layout_marginBottom="30dp"
+            android:layout_height="wrap_content">
 
             <TextView
+                android:id="@+id/textView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/extraceArgumentsName">
+                android:layout_marginStart="30dp"
+                android:layout_marginLeft="30dp"
+                android:text="@string/extraceArgumentsName"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent">
 
             </TextView>
-        </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/linearLayout4"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_height="wrap_content">
 
             <Button
                 android:id="@+id/doneButtonId"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="30dp"
-                android:text="@string/DoneConfig" />
-        </LinearLayout>
+                android:layout_marginStart="30dp"
+                android:layout_marginLeft="30dp"
+                android:layout_marginBottom="1dp"
+                android:text="@string/DoneConfig"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
