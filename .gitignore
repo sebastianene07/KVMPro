@@ -1,4 +1,5 @@
 *.iml
+*.d
 .gradle
 /local.properties
 /.idea/caches
@@ -13,3 +14,10 @@
 .externalNativeBuild
 .cxx
 app/src/main/jniLibs/arm64-v8a/libkvmtool.so
+caches/
+daemon/
+native/
+wrapper/
+.tmp/
+android/
+android.lock
